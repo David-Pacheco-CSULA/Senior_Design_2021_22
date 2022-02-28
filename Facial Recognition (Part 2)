@@ -1,0 +1,74 @@
+# Facial Recognition (Part 2)
+
+import numpy as np
+import cv2 as cv
+import os # To be able to access the directories 
+
+people=[]  # Empty List that will contain the name of the people
+DIR = r'C:\\Users\\david\\Desktop\\CSULA 2021 Fall\\Senior Design\\Python\\Training_Data'
+
+# This command gets all the names of everything within a certain folder then appends it to an empty list
+for i in os.listdir(DIR):  
+    people.append(i)
+
+# Classifer is the algorithm itself to detect a face
+# Now we read in the xml pretrained classifier file we downloaded from OPENCVs website
+haar_cascade = cv.CascadeClassifier('C:\\Users\\david\\Desktop\\CSULA 2021 Fall\\Senior Design\\Python\\Classifers_Detection\\haar_face.xml') 
+
+features = np.load('features.npy', allow_pickle = True) # Loads in the features array that I made in 'faces_train'
+labels = np.load('labels.npy') # Loads in the labels array that I made in 'faces_train'
+
+#This makes the face recognizer class (OPENCV's FACE RECOGNIZER)
+face_recognizer = cv.face.LBPHFaceRecognizer_create()
+
+# Read in the .yml file so the recognizer is trained
+face_recognizer.read('C:\\Users\\david\\Desktop\\CSULA 2021 Fall\\Senior Design\\Python\\face_trained.yml')
+
+# LIVE VIDEO PORTION
+capture = cv.VideoCapture(0)  # Uses the camera to gather its frames 
+
+while True:
+    ret, frame = capture.read() # ret bascially says if read() is true or not 
+
+    # SINGLE IMAGE
+    # img = cv.imread(frame)
+
+    def rescaleFrame (frame, scale = 1):  # Function takes in a frame and rescales it by the scale value (CURRENTLY SET TO: 25%)
+        width = int(500 * scale)          # 'frame.shape[1]' returns the width of the image & int(frame.shape[1]) makes the width an integer
+        height = int(500 * scale)         # 'frame.shape[0]' returns the height of the image & int(frame.shape[0]) makes the height an integer
+        dimensions = (width,height)       # varible storing width and height 
+        return cv.resize(frame, dimensions,interpolation=cv.INTER_AREA) # We will talk about this later in depth but for now just know
+                                                                        # it resizes the frame to a specific dimension
+    img = rescaleFrame(frame) # RESCALE FUNCTION CALLED 
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+
+    # cv.imshow('Person', gray) # TESTING IF GRAY SCALED FRAME CAN BE OUTPUTED 
+
+    # Detect the face in the image
+    faces_rect = haar_cascade.detectMultiScale(gray, 1.1, 7) 
+
+    for(x,y,w,h) in faces_rect:
+        faces_roi = gray[y:y+h, x:x+h] # Grabs the face in the image 
+
+        # Using the 'face_recognizer' class to get the predicted label (persons name) & confidence (confidence it is that person)
+        label, confidence = face_recognizer.predict(faces_roi) 
+
+        #Prints the label and confidence of the image you fed it
+        print(f'Label = {people[label]} with a confidence of {confidence}')
+        
+        #Put text on the image
+        # (IMAGE, TEXT, text origin, font, font scale, color, thickness)
+        cv.putText(img, str(people[label]), (20,20), cv.FONT_HERSHEY_COMPLEX, 1.0, (0,255,0), thickness = 2)
+    
+        #Put rectangle on the face in the image
+        # (IMAGE, TL Corner, BR corner, Color, thickness of border of rect)
+        cv.rectangle(img, (x,y), (x+w, y+h), (0,255,0), thickness=2)
+
+
+    cv.imshow('Detected Face', img)
+    if cv.waitKey(20) & 0xFF==ord('d'):     # If Statement: if you press 'd' on the keyboard
+        break  
+   
+cv.waitKey(0)
+capture.release()
+cv.destroyAllWindows()
