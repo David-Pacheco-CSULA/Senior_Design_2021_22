@@ -1,0 +1,56 @@
+# 11/9/2021  FACE DETECTION (PREMADE VIDEO)
+# 1) Face Detection using Haar cascades (not the best way to detect faces)
+# 2) Face detection is performed using classifiers 
+#     A) Classifier: is an algorithm that decides whether a given 
+#     image is positive or negative whether a face is present or not
+#     B) Classifiers need to be given thousands of pictures to train it 
+#     however openCV already comes with a lot of pre trained classifiers
+#     C) The two main classifiers are: A) Har cascades & B) Local Binary Patterns (More advanced)
+#     D) This code uses a classifier that OpenCV has to detect faces.
+
+import cv2 as cv
+
+capture = cv.VideoCapture('C:\\Users\\david\\Pictures\\Camera Roll\\OpenCV Video Lesson 1 Reading Videos.mp4') # Captures the video and stores it in variable 'capture'
+
+def rescaleFrame (frame, scale = 0.15):  # Function takes in a frame and rescales it by the scale value (CURRENTLY SET TO: 25%)
+    width = int(frame.shape[1] * scale)  # 'frame.shape[1]' returns the width of the image & int(frame.shape[1]) makes the width an integer
+    height = int(frame.shape[0] * scale) # 'frame.shape[0]' returns the height of the image & int(frame.shape[0]) makes the height an integer
+    dimensions = (width,height)          # varible storing width and height 
+
+    return cv.resize(frame, dimensions,interpolation=cv.INTER_AREA) # We will talk about this later in depth but for now just know
+                                                                    # it resizes the frame to a specific dimension
+
+# Now we read in the xml pretrained classifier file we made
+haar_cascade = cv.CascadeClassifier('C:\\Users\\david\\Desktop\\CSULA 2021 Fall\\Senior Design\\Python\\Classifers_Detection\\haar_face.xml') # Passing the xml file we have that has the classifier into a variable
+
+while True:                                 # While loop
+    isTrue, frame = capture.read()          # A boolean statement that returns true if the frame was sucessfully read
+                                            # capture.read() reads the video within the variable 'capture' frame by frame
+
+    frame_resized = rescaleFrame(frame)     # Resize frame
+
+    # Face detection doesnt involve skin tone so we need to convert to gray scale
+    # Haar Cascade uses edges to detect if something is a face or not 
+    gray = cv.cvtColor(frame_resized, cv.COLOR_BGR2GRAY)
+
+    # 'faces_rect' is essentially the rectangular coordinates for the faces in the image
+    faces_rect = haar_cascade.detectMultiScale(gray,scaleFactor=1.1, minNeighbors = 6) # (image, scale factor, number of neighbors a rectangle should have to be called a face)
+    # The higher the minimum neighbors the more stringent the code will be when determining if something is a face or not so making it more likely that what is detected is a face buttttt....
+    # that might lead to not being able to detect some faces in a image
+
+    # Since we know 'faces_rect' is just coordinates we can now print a rectangle over the faces
+    for(x,y,w,h) in faces_rect:  # Gets the variables in faces_rect
+        cv.rectangle(frame_resized, (x,y), (x+w, y+h), (0,255,0), thickness = 2)
+
+    cv.imshow('Detect Faces', frame_resized)
+
+    if cv.waitKey(10) & 0xFF==ord('d'):     # If Statement: if you press 'd' on the keyboard
+        break                               # Breaks out of a loop
+
+capture.release()                           # Unlocks sections of code to be used by other sections needing locks
+cv.destroyAllWindows()                      # Removes all windows that were opened 
+
+# Printing 'len(faces_rect)' will give you the number of faces found
+print(f'Number of faces found = {len(faces_rect)}')
+
+cv.waitKey(0)
