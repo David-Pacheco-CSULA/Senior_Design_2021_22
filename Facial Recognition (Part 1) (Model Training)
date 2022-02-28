@@ -1,0 +1,65 @@
+# Facial Recoginition (Part 1) => Creates the 'face_trained.yml' (Trained File) for Part 2
+
+import os  # To be able to access the directories 
+import cv2 as cv
+import numpy as np
+
+# REMEMBER WE ARE NOT BUILDING MACHINE LEARNING MODEL BY SCRATCH, OPENCV HAS A BUILT IN FACE RECOGNIZER 
+
+# MANUEL INSERTION: people = ['Ben Afflek', 'Elton John', 'Jerry Seinfield', 'Madonna', 'Mindy Kaling']
+
+people=[]  # Empty List that will contain the name of the people
+DIR = r'C:\\Users\\david\\Desktop\\CSULA 2021 Fall\\Senior Design\\Python\\Training_Data' # This folder contains the folders with all the training pictures 
+
+# This for loop gets all the names of everything within a certain folder then appends it to an empty list
+for i in os.listdir(DIR):  # "os.listdir(DIR)" it gets an array of the names from the folders you have within the folder you choose
+    people.append(i)       # Slaps in/appends all the names into array "people"
+
+# Now we read in the xml pretrained classifier file we downloaded from OPENCVs website
+haar_cascade = cv.CascadeClassifier('C:\\Users\\david\\Desktop\\CSULA 2021 Fall\\Senior Design\\Python\\Classifers_Detection\\haar_face.xml') # Passing the xml file we have that has the classifier into a variable
+
+# Training set will include FEATURES and LABELS
+features = []   # Arrays of the faces
+labels = []     # For every face what is its corresponding label
+
+# This function will loop through every folder and grab every image within that folder and grab the face and add it to the training set.
+def create_train():
+    for person in people: # Loop through every person in the list of people => "person" is a new variable & "people" is an array of people
+        # "join", bascially appends person to the DIR path to make a new path 
+        path = os.path.join(DIR, person) # Grabs every path of every folder of the specific person => "path" is a new variable & "DIR" is the path of the trainig folder & "person" is the list of people 
+        label = people.index(person) # Get the index of the array where that person is at 
+
+        # Now that we are in each folder we will loop within every image of that folder
+        for img in os.listdir(path): #'os.listdir(path) gets every image name within the 'path'
+            img_path = os.path.join(path, img) #Joins to paths to make a path to every image 
+            img_array = cv.imread(img_path) # Displays the image 
+            gray = cv.cvtColor(img_array, cv.COLOR_BGR2GRAY) # Change to gray scale
+            # Use Harr_cascade to detect the face in the image
+            faces_rect = haar_cascade.detectMultiScale(gray, scaleFactor = 1.1, minNeighbors = 4)
+
+            #faces_rect essentially is now the starting corner and the corner diagonal to the starting corner coordinates
+            for (x,y,w,h) in faces_rect:
+                faces_roi = gray[y:y+h, x:x+w] # This crops out the face 
+                features.append(faces_roi) #You put all the faces into the array features
+                labels.append(label) #This gets the index of where each person is in the array and puts that in another array for Performance sake
+
+create_train()
+print('Training done-------------------')
+features = np.array(features, dtype = 'object') # Making theis array a numpy arrays for the purpose of making it .npy
+labels = np.array(labels) # Making theis array a numpy arrays for the purpose of making it .npy
+
+#This makes the face recognizer class (OPENCV's FACE RECOGNIZER)
+face_recognizer = cv.face.LBPHFaceRecognizer_create() 
+
+# Train the Recognizer on the features list and the labels list (OPENCV's FACE RECOGNIZER)
+face_recognizer.train(features, labels)
+
+# Saving the file as .yml will allow us to use this already trained model in another file
+face_recognizer.save('face_trained.yml') 
+
+np.save('features.npy', features) # Saving the features array as a .npy so we can use it in another file
+np.save('labels.npy', labels) # Saving the label array as a .npy so we can use it in another file
+
+
+
+
