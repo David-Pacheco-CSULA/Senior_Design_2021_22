@@ -7,8 +7,8 @@ between objects).
 When I completed the facial detection code I realized that I would not have 
 the ability to create an accurate enough learning model to fit the needs of our robot so I have 
 decided to use those paths. From there, OpenCV has an integrated function that specifically uses 
-those paths for object detection so it was pretty straight foward. I have added comments to all the code seen
-so nothing should be a mystery. 
+those paths for object detection so it was pretty straight foward. Many many helpful references/guides online.
+I have added comments to all the code seen so nothing should be a mystery. 
 
 References: 
 (1)"OpenCV Course - Full Tutorial with Python"               https://www.youtube.com/watch?v=oXlwWbU8l2o&t=11266s
