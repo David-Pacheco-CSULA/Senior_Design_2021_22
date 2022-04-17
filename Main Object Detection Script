@@ -1,4 +1,4 @@
-# OBJECT DETECTION 
+# OBJECT DETECTION (NOTE A MADE A SMALL EDIT TO ONLY OUTPUT THE DECTION BOX FOR TENNIS BALLS/ IT CAN BE EASILY CHANGED BACK TO DETECTING EVERYTHING IF REMOVED) 
 
 #                               IMPORTED DOCUMENTS 
 # 'coco.names'                List of typical object used in a typical object detection code
