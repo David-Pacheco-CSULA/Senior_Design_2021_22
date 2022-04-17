@@ -100,9 +100,8 @@ while True:
                 
                 ball_area    =  h * w  
                 ball_coverage = ball_area / total_area 
-                ball_coverage = ball_coverage * 10000
 
-                distance = 500 / pow(ball_coverage,0.595) # Inches
+                distance = 500 / pow(ball_coverage * 10000,0.595) # Inches
                 #------------------------------------------------------------------------------------------------------------------------------------
 
                 cv2.rectangle(img,(x,y),(x+w,h+y),color=(0,255,0),thickness = 1)
